@@ -14,7 +14,7 @@ A lightweight, serverless Chrome Extension designed to automate the extraction o
 * **Logic:** Vanilla JavaScript (ES6+)
 * **Architecture:** Chrome Extension API (Manifest V3), Serverless
 
-## Installation (Google Extension Developer Mode)
+## Installation (Chrome Extension Developer Mode)
 Since this is a specialized, personal-use utility, it is run locally via Chrome's Developer Mode:
 1. Clone this repository to your local machine.
 2. Open Google Chrome and navigate to `chrome://extensions/`.
