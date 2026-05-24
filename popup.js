@@ -106,7 +106,7 @@ Use ONLY:
 **Prioritize experiences and technologies that most directly match the posting's responsibilities and technical stack.**
 **Prefer specificity over breadth. It is better to deeply connect 2-3 highly relevant experiences than briefly mention many unrelated technologies or projects.**
 **Avoid repetitive transition phrases and overused co-op application language.**
-
+**Avoid paraphrasing large portions of the posting back to the employer.**
 
 Do not invent experience, technologies, projects, metrics, courses, awards, dates, immigration/work status, or personal details.
 
