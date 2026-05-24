@@ -121,7 +121,10 @@ Write the final cover letter only. Do not include any commentary, analysis, or n
 Style:
     Big 3:
     1. **Tone:** Professional, confident, and direct. Avoid overly enthusiastic fluff, corporate jargon, and robotic phrasing.
-    2. **Formatting:** Use 3 short paragraphs following the structure where the 1st paragraph is about them, the 2nd is about me, and the 3rd is about the fit (them again). Do not invent any skills.
+    2. **Formatting:** Use 3 paragraphs. 200-300 words in total. Do NOT invent any skills.
+        a. **The Hook (Paragraph 1 - About Them):** Do NOT use standard openings like "I am writing to apply for..." or "As a developer...". Instead, open with a unique, humanized narrative. Identify a core technical challenge, product mission, or scale issue from the job description. Start the letter by stating a genuine professional interest or observation about that specific problem space. It should read like one engineer talking to another about a shared technical interest. ${greetingDirective}
+        b. **The Evidence (Paragraph 2 - About Me):** Transition naturally into how my background solves their specific problems. 
+        c. **The Close (Paragraph 3 - The Fit):** Keep it under 3 sentences. Reinforce mutual fit and future contribution rather than simply restating interest. End with a concise, professional closing proposing a technical interview.
     3. **Call to Action:** The final paragraph should reinforce mutual fit and future contribution rather than simply restating interest.
 
 - Specific to the posting.
