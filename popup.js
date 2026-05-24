@@ -1,0 +1,359 @@
+const generateBtn = document.getElementById("generateBtn");
+const copyBtn = document.getElementById("copyBtn");
+const statusDiv = document.getElementById("status");
+const preview = document.getElementById("preview");
+
+let latestPrompt = "";
+
+generateBtn.addEventListener("click", async () => {
+    setStatus("Scraping job posting...", "neutral");
+    setBusy(true);
+
+    try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+        if (!tab?.id || !tab?.url) {
+            setStatus("Could not read the active tab.", "error");
+            return;
+        }
+
+        const url = new URL(tab.url);
+
+        if (!url.hostname.endsWith("sfu.ca")) {
+            setStatus("Open an SFU MyExperience posting first.", "error");
+            return;
+        }
+
+        const [injectionResult] = await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: scrapeJobData
+        });
+
+        const data = injectionResult?.result;
+
+        if (!data) {
+            setStatus("No job data was returned from the page.", "error");
+            return;
+        }
+
+        if (!data.description || data.description.length < 80) {
+            setStatus("Could not extract enough job details from this page.", "error");
+            preview.value = JSON.stringify(data, null, 2);
+            return;
+        }
+
+        latestPrompt = buildPrompt(data);
+        preview.value = latestPrompt;
+        copyBtn.disabled = false;
+
+        await copyPromptToClipboard(latestPrompt);
+        setStatus("Prompt generated and copied.", "success");
+    } catch (error) {
+        console.error("Prompt generation failed:", error);
+        setStatus(readableError(error), "error");
+    } finally {
+        setBusy(false);
+    }
+});
+
+copyBtn.addEventListener("click", async () => {
+    const promptToCopy = preview.value.trim() || latestPrompt;
+
+    if (!promptToCopy) {
+        setStatus("Generate a prompt first.", "error");
+        return;
+    }
+
+    try {
+        await copyPromptToClipboard(promptToCopy);
+        latestPrompt = promptToCopy;
+        setStatus("Copied to clipboard.", "success");
+    } catch (error) {
+        console.error("Clipboard copy failed:", error);
+        setStatus("Could not copy to clipboard. Select the preview text manually.", "error");
+    }
+});
+
+function buildPrompt(data) {
+    const contactLine = data.contactName ? `\nContact person: ${data.contactName}` : "";
+    const locationLine = data.location ? `\nLocation: ${data.location}` : "";
+    const deadlineLine = data.deadline ? `\nApplication deadline: ${data.deadline}` : "";
+    const requirementsBlock = data.requirements
+        ? `\n\n# ADDITIONAL REQUIREMENTS / QUALIFICATIONS\n---\n${data.requirements}\n---`
+        : "";
+
+    return `
+# TASK
+Write a highly tailored co-op cover letter for the role below.
+
+This prompt is being pasted into an existing chat thread that already contains my resume, projects, skills, writing preferences, and/or past cover letters.
+
+# TARGET ROLE
+Position: ${fallback(data.title, "[Job Title]")}
+Company: ${fallback(data.company, "[Company]")}${locationLine}${deadlineLine}${contactLine}
+
+# JOB POSTING
+---
+${fallback(data.description, "[Job description was not extracted.]")}
+---${requirementsBlock}
+
+# INSTRUCTIONS
+Use ONLY:
+1. My background information already available in this chat thread.
+2. The job posting above.
+
+**Prioritize the most recent and professionally relevant experience first. Academic projects should support, not overshadow, professional experience when applicable.**
+**Prioritize experiences and technologies that most directly match the posting's responsibilities and technical stack.**
+**Prefer specificity over breadth. It is better to deeply connect 2-3 highly relevant experiences than briefly mention many unrelated technologies or projects.**
+**Avoid repetitive transition phrases and overused co-op application language.**
+
+
+Do not invent experience, technologies, projects, metrics, courses, awards, dates, immigration/work status, or personal details.
+
+Before writing, silently identify:
+- The employer's main needs.
+- The 2 to 3 strongest overlaps between my background and the posting.
+- Any keywords from the posting that should be naturally reflected.
+
+# COVER LETTER REQUIREMENTS
+Write the final cover letter only. Do not include any commentary, analysis, or notes unless explicitly asked for.
+
+Style:
+    Big 3:
+    1. **Tone:** Professional, confident, and direct. Avoid overly enthusiastic fluff, corporate jargon, and robotic phrasing.
+    2. **Formatting:** Use 3 short paragraphs following the structure where the 1st paragraph is about them, the 2nd is about me, and the 3rd is about the fit (them again). Do not invent any skills.
+    3. **Call to Action:** The final paragraph should reinforce mutual fit and future contribution rather than simply restating interest.
+
+- Specific to the posting.
+- No bullet points.
+- No placeholders.
+
+Output ONLY the cover letter text.
+`.trim();
+}
+
+async function copyPromptToClipboard(text) {
+    await navigator.clipboard.writeText(text);
+}
+
+function setStatus(message, type) {
+    statusDiv.innerText = message;
+
+    if (type === "success") {
+        statusDiv.style.color = "#147a2e";
+    } else if (type === "error") {
+        statusDiv.style.color = "#b00020";
+    } else {
+        statusDiv.style.color = "#555";
+    }
+}
+
+function setBusy(isBusy) {
+    generateBtn.disabled = isBusy;
+    generateBtn.innerText = isBusy ? "Generating..." : "Generate";
+}
+
+function fallback(value, fallbackValue) {
+    const cleaned = typeof value === "string" ? value.trim() : "";
+    return cleaned || fallbackValue;
+}
+
+function readableError(error) {
+    const message = error?.message || String(error);
+
+    if (message.includes("Cannot access contents of url")) {
+        return "Chrome blocked access to this page. Reload the posting and try again.";
+    }
+
+    if (message.includes("The extensions gallery cannot be scripted")) {
+        return "Chrome does not allow scripting this page.";
+    }
+
+    return "An error occurred while generating the prompt.";
+}
+
+/**
+ * Runs in the active SFU MyExperience page.
+ */
+function scrapeJobData() {
+    function cleanText(value) {
+        return String(value || "")
+            .replace(/\u00a0/g, " ")
+            .replace(/[ \t]+/g, " ")
+            .replace(/\n[ \t]+/g, "\n")
+            .replace(/[ \t]+\n/g, "\n")
+            .replace(/\n{3,}/g, "\n\n")
+            .trim();
+    }
+
+    function firstText(selectors) {
+        for (const selector of selectors) {
+            const node = document.querySelector(selector);
+            const text = cleanText(node?.innerText || node?.textContent || "");
+            if (text) return text;
+        }
+
+        return "";
+    }
+
+    function getTableValue(labelCandidates) {
+        const labels = Array.isArray(labelCandidates) ? labelCandidates : [labelCandidates];
+
+        const normalizedLabels = labels.map((label) =>
+            cleanText(label).replace(/:$/, "").toLowerCase()
+        );
+
+        const cells = Array.from(document.querySelectorAll("td, th, strong, b, span, div"));
+
+        for (const cell of cells) {
+            const cellText = cleanText(cell.innerText || cell.textContent || "");
+            const normalizedCellText = cellText.replace(/:$/, "").toLowerCase();
+
+            const matches = normalizedLabels.some((label) =>
+                normalizedCellText === label || normalizedCellText.includes(label)
+            );
+
+            if (!matches) continue;
+
+            const tableCell = cell.closest("td, th");
+
+            if (tableCell?.nextElementSibling) {
+                const siblingText = cleanText(
+                    tableCell.nextElementSibling.innerText ||
+                    tableCell.nextElementSibling.textContent ||
+                    ""
+                );
+
+                if (siblingText && !normalizedLabels.includes(siblingText.toLowerCase())) {
+                    return siblingText;
+                }
+            }
+
+            const row = cell.closest("tr");
+            if (row) {
+                const rowCells = Array.from(row.querySelectorAll("td, th"));
+                const index = rowCells.findIndex((rowCell) => rowCell === tableCell);
+
+                if (index >= 0 && rowCells[index + 1]) {
+                    const rowValue = cleanText(rowCells[index + 1].innerText || rowCells[index + 1].textContent || "");
+                    if (rowValue) return rowValue;
+                }
+
+                if (rowCells.length >= 2) {
+                    const lastCellText = cleanText(rowCells[rowCells.length - 1].innerText || rowCells[rowCells.length - 1].textContent || "");
+                    if (lastCellText && lastCellText !== cellText) return lastCellText;
+                }
+            }
+        }
+
+        return "";
+    }
+
+    function limitText(text, maxChars) {
+        const cleaned = cleanText(text);
+
+        if (cleaned.length <= maxChars) {
+            return cleaned;
+        }
+
+        const truncated = cleaned.slice(0, maxChars);
+        const lastBoundary = Math.max(
+            truncated.lastIndexOf("\n\n"),
+            truncated.lastIndexOf(". "),
+            truncated.lastIndexOf("; "),
+            truncated.lastIndexOf(", ")
+        );
+
+        const safeCut = lastBoundary > maxChars * 0.7
+            ? truncated.slice(0, lastBoundary + 1)
+            : truncated;
+
+        return `${safeCut.trim()}\n\n[Truncated because the posting was very long.]`;
+    }
+
+    function normalizeTitle(rawTitle) {
+        return cleanText(rawTitle)
+            .replace(/^\d+\s*-\s*/, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    const title = normalizeTitle(firstText([
+        "h1.dashboard-header__profile-information-name",
+        "h1",
+        "[data-testid='job-title']"
+    ]));
+
+    const company = firstText([
+        "h2.dashboard-header__profile-information-subtitle",
+        "h2",
+        "[data-testid='company-name']"
+    ]);
+
+    const description = getTableValue([
+        "Job Description:",
+        "Job Description",
+        "Description:",
+        "Description",
+        "Position Description:",
+        "Position Description"
+    ]);
+
+    const requirements = getTableValue([
+        "Qualifications:",
+        "Qualifications",
+        "Required Skills:",
+        "Required Skills",
+        "Requirements:",
+        "Requirements",
+        "Skills:",
+        "Skills"
+    ]);
+
+    const location = getTableValue([
+        "Job Location:",
+        "Job Location",
+        "Location:",
+        "Location",
+        "Work Location:",
+        "Work Location"
+    ]);
+
+    const deadline = getTableValue([
+        "Application Deadline:",
+        "Application Deadline",
+        "Deadline:",
+        "Deadline",
+        "Apply By:",
+        "Apply By",
+        "Closing Date:",
+        "Closing Date"
+    ]);
+
+    const firstName = getTableValue([
+        "Job Contact First Name:",
+        "Job Contact First Name",
+        "Contact First Name:",
+        "Contact First Name"
+    ]);
+
+    const lastName = getTableValue([
+        "Job Contact Last Name:",
+        "Job Contact Last Name",
+        "Contact Last Name:",
+        "Contact Last Name"
+    ]);
+
+    const contactName = cleanText(`${firstName} ${lastName}`);
+
+    return {
+        title: title || "[Job Title]",
+        company: company || "[Company]",
+        location,
+        deadline,
+        contactName,
+        description: limitText(description, 7000),
+        requirements: limitText(requirements, 2500),
+        rawPageTitle: cleanText(document.title)
+    };
+}
