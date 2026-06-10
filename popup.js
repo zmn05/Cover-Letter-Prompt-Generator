@@ -84,9 +84,10 @@ function buildPrompt(data) {
 
     return `
 # TASK
-Write a highly tailored co-op cover letter for the role below.
-
-This prompt is being pasted into an existing chat thread that already contains my resume, projects, skills, writing preferences, and/or past cover letters.
+You are a strict, senior technical recruiter and executive copywriter. 
+First, evaluate my fit for the role below based on my resume and the context already provided in this chat.
+Second, provide a targeted interview prep guide based on their specific requirements.
+Third, write a highly tailored co-op cover letter, regardless of the match score.
 
 # TARGET ROLE
 Position: ${fallback(data.title, "[Job Title]")}
@@ -97,7 +98,26 @@ Company: ${fallback(data.company, "[Company]")}${locationLine}${deadlineLine}${c
 ${fallback(data.description, "[Job description was not extracted.]")}
 ---${requirementsBlock}
 
-# INSTRUCTIONS
+# OUTPUT FORMAT
+You must structure your response exactly like this:
+
+### Pre-Flight Fit Assessment
+*   **Match Score:** [0-100%]
+*   **Green Flags:** [1-2 strong overlaps between their stack/needs and my background]
+*   **Red Flags:** [Missing skills, mismatched seniority, or potential concerns]
+
+### Interview Prep Focus
+*   **Technical Concepts to Review:** [1-2 specific system design principles, frameworks, or architectural concepts I should study to defend my Red Flags or ace their technical screen]
+*   **Narrative Strategy:** [How I should frame my existing experience during an interview to bridge any gaps]
+
+---
+
+### Cover Letter
+[Generate the tailored cover letter here]
+
+# COVER LETTER REQUIREMENTS
+Write the final cover letter only. Do not include any commentary, analysis, or notes unless explicitly asked for.
+
 Use ONLY:
 1. My background information already available in this chat thread.
 2. The job posting above.
@@ -115,9 +135,6 @@ Before writing, silently identify:
 - The 2 to 3 strongest overlaps between my background and the posting.
 - Any keywords from the posting that should be naturally reflected.
 
-# COVER LETTER REQUIREMENTS
-Write the final cover letter only. Do not include any commentary, analysis, or notes unless explicitly asked for.
-
 Style:
     Big 3:
     1. **Tone:** Professional, confident, and direct. Avoid overly enthusiastic fluff, corporate jargon, and robotic phrasing.
@@ -134,7 +151,6 @@ Style:
 - No bullet points.
 - No placeholders.
 
-Output ONLY the cover letter text.
 `.trim();
 }
 
