@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SFU Co-op Prompt Compiler",
-  "version": "3.5.0",
+  "version": "3.6.0",
   "description": "Extracts SFU MyExperience job postings and compiles a tailored cover-letter prompt.",
   "permissions": [
     "activeTab",

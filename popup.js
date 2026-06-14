@@ -104,10 +104,11 @@ You must structure your response exactly like this:
 ### Pre-Flight Fit Assessment
 *   **Match Score:** [0-100%]
 *   **Green Flags:** [1-2 strong overlaps between their stack/needs and my background]
+*   **Beige Flags:** [1-2 areas where I have some relevant experience but it's not a direct match; this is the "gray area" where interview performance and narrative framing will be crucial]
 *   **Red Flags:** [Missing skills, mismatched seniority, or potential concerns]
 
 ### Interview Prep Focus
-*   **Technical Concepts to Review:** [1-2 specific system design principles, frameworks, or architectural concepts I should study to defend my Red Flags or ace their technical screen]
+*   **Technical Concepts to Review:** [1-3 specific system design principles, frameworks, or architectural concepts I should study to defend my Red Flags or ace their technical screen]
 *   **Narrative Strategy:** [How I should frame my existing experience during an interview to bridge any gaps]
 
 ---
@@ -118,10 +119,15 @@ You must structure your response exactly like this:
 # COVER LETTER REQUIREMENTS
 Write the final cover letter only. Do not include any commentary, analysis, or notes unless explicitly asked for.
 
+## Instructions
 Use ONLY:
 1. My background information already available in this chat thread.
 2. The job posting above.
 
+**The Rule of Ruthless Omission:** Strictly exclude any technologies, projects, or experiences from my background that do not directly map to the job's core requirements. 
+For example, if the role is backend and testing focused, there is no need to mention frontend frameworks/experience. If the role is frontend-focused, there is no need to mention database migrations.
+**The "Teammate" Rule (Paragraph 2 - About Me):** Do NOT copy bullet points from my resume verbatim. My resume already proves *what* I did; this cover letter must explain *how* I did it and *why* it translates to their team. 
+Instead of listing technologies, transform my relevant achievements into a brief narrative about my engineering mindset, how I approach debugging complex systems, or my experience navigating technical migrations and deployments.
 **Prioritize the most recent and professionally relevant experience first. Academic projects should support, not overshadow, professional experience when applicable.**
 **Prioritize experiences and technologies that most directly match the posting's responsibilities and technical stack.**
 **Prefer specificity over breadth. It is better to deeply connect 2-3 highly relevant experiences than briefly mention many unrelated technologies or projects.**
