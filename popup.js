@@ -115,10 +115,11 @@ ${fallback(data.description, "[Job description was not extracted.]")}
 You must structure your response exactly like this:
 
 ### Pre-Flight Fit Assessment
-*   **Match Score:** [0-100%]
-*   **Green Flags:** [1-2 strong overlaps between their stack/needs and my background]
-*   **Beige Flags:** [1-2 areas where I have some relevant experience but it's not a direct match; this is the "gray area" where interview performance and narrative framing will be crucial]
-*   **Red Flags:** [Missing skills, mismatched seniority, or potential concerns]
+*   **Match Score:** [0-100%. Base this score PRIMARILY on "Must Haves" and core responsibilities. Do NOT heavily penalize the score for missing "Preferred", "Bonus", or "Nice-to-have" adjacent qualifications. 
+    Though, these should still be considered during the scoring and narrative strategy.]
+*   **Green Flags:** [1-2 strong overlaps between their core stack/needs and my background]
+*   **Beige Flags:** [1-2 areas where I have partial experience, OR where I am missing a "Preferred" qualification. This is the "gray area" where interview framing is crucial.]
+*   **Red Flags:** [STRICTLY for missing "Must Have" skills, hard dealbreakers, or mismatched seniority. Do NOT list missing "Preferred" or "Bonus" skills here.]
 
 ### Interview Prep Focus
 *   **Technical Concepts to Review:** [1-3 specific system design principles, frameworks, or architectural concepts I should study to defend my Red Flags or ace their technical screen]
