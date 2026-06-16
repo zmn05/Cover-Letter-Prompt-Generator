@@ -120,6 +120,7 @@ You must structure your response exactly like this:
 *   **Green Flags:** [1-2 strong overlaps between their core stack/needs and my background]
 *   **Beige Flags:** [1-2 areas where I have partial experience, OR where I am missing a "Preferred" qualification. This is the "gray area" where interview framing is crucial.]
 *   **Red Flags:** [STRICTLY for missing "Must Have" skills, hard dealbreakers, or mismatched seniority. Do NOT list missing "Preferred" or "Bonus" skills here.]
+*   **Location & Logistics Considerations:** [Any notes about commute, remote work, relocation, or scheduling that could impact my candidacy or interview process. I am based in Vancouver, BC. so this is a key consideration.]
 
 ### Interview Prep Focus
 *   **Technical Concepts to Review:** [1-3 specific system design principles, frameworks, or architectural concepts I should study to defend my Red Flags or ace their technical screen]
